@@ -8,6 +8,6 @@ Instruction on how to run visualization
 3a. More details here(https://www.npmjs.com/package/http-server)
 4. once npm and npm http-server is installed close the terminal or cmd line and open a new instance 
 5. now cd or change directory to where the index.html and flare.json is located
-6. once you are in the folder 'IliosProject' run npm http-server
+6. once you are in the folder 'IliosProject' run http-server
 7. finally go to your broswer and type localhost:8080 into adress bar
 8. Alrighttttt you should see the SUNBURST! 

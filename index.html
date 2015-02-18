@@ -1,166 +1,24 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<meta charset="utf-8">
-<style>
-<head>
-  <meta charset="utf-8">
-  <title>Ilios Circulum Visualizer</title>
-  <link rel="stylesheet" href="css/normalize.css">
-  <link rel="stylesheet" href="css/style.css">
-</head>
-body {
-  font-family: "Helvehtica Neue", Helvetica, Arial, sans-serif;
-  margin: auto;
-  position: relative;
-  width: 960px;
-}
+<html>
+    <head>
+    	<meta charset="utf-8">
 
+  		<link rel="stylesheet" href="css/normalize.css">
+  		<link rel="stylesheet" href="css/style.css">
 
-form {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-}
+  		<script src="js/libs/jquery-1.10.2.js"></script>
+		<script src="js/libs/handlebars-v2.0.0.js"></script>
+		<script src="js/libs/ember-1.9.1.js"></script>
+		<script src="js/app.js"></script>
+		<script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+        <!-- data-main attribute tells require.js to load
+             scripts/main.js after require.js loads. -->
+        <script data-main="scripts/main" src="scripts/require.js"></script>
+    </head>
 
-path {
-  stroke: #fff;
-  fill-rule: evenodd;
-}
-text {
-  font: 15px sans-serif;
-  cursor: pointer;
-}
-
-body {
-  width: 880px;
-  margin: 0 auto;
-}
-
-h1 {
-  text-align: center;
-  margin: .5em 0;
-}
-
-p#intro {
-  text-align: center;
-  margin: 1em 0;
-}
-
-text {
-  font: 15px sans-serif;
-  cursor: pointer;
-}
-
-body {
-  width: 1000px;
-  margin: 0 auto;
-}
-
-h1 {
-  text-align: center;
-  margin: .5em 0;
-}
-
-p#intro {
-  text-align: center;
-  margin: 1em 0;
-}
-</style>
-<body>
-<form>
-  <label><input type="radio" name="mode" value="size"> Size</label>
-  <label><input type="radio" name="mode" value="count" checked> Count</label>
-</form>
-<script src="js/libs/jquery-1.10.2.js"></script>
-<script src="js/libs/handlebars-v2.0.0.js"></script>
-<script src="js/libs/ember-1.9.1.js"></script>
-<script src="js/app.js"></script>
-<script  src="http://d3js.org/d3.v3.min.js"></script>
-<script>
-
-var width = 860,
-    height = 700,
-    radius = Math.min(width, height) / 2;
-
-var x = d3.scale.linear()
-    .range([0, 2 * Math.PI]);
-
-var y = d3.scale.linear()
-    .range([0, radius]);
-
-var color = d3.scale.category20c();
-
-var svg = d3.select("body").append("svg")
-    .attr("width", width)
-    .attr("height", height)
-  .append("g")
-    .attr("transform", "translate(" + width / 2 + "," + (height / 2 + 10) + ")");
-
-var partition = d3.layout.partition()
-    .sort(null)
-    .value(function(d) { return d.size; });
-
-var arc = d3.svg.arc()
-    .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x))); })
-    .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx))); })
-    .innerRadius(function(d) { return Math.max(0, y(d.y)); })
-    .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
-// Keep track of the node that is currently being displayed as the root.
-var node;d3.json("flare.json", function(error, root) {
-  var g = svg.selectAll("g")
-      .data(partition.nodes(root))
-    .enter().append("g");
-
-  var path = g.append("path")
-    .attr("d", arc)
-    .style("fill", function(d) { return color((d.children ? d : d.parent).name); })
-    .on("click", click);
-
-  var text = g.append("text")
-    .attr("transform", function(d) { return "rotate(" + computeTextRotation(d) + ")"; })
-    .attr("x", function(d) { return y(d.y); })
-    .attr("dx", "6") // margin
-    .attr("dy", ".35em") // vertical-align
-    .text(function(d) { return d.name; });
-
-  function click(d) {
-    // fade out all text elements
-    text.transition().attr("opacity", 0);
-
-    path.transition()
-      .duration(750)
-      .attrTween("d", arcTween(d))
-      .each("end", function(e, i) {
-          // check if the animated element's data e lies within the visible angle span given in d
-          if (e.x >= d.x && e.x < (d.x + d.dx)) {
-            // get a selection of the associated text element
-            var arcText = d3.select(this.parentNode).select("text");
-            // fade in the text element and recalculate positions
-            arcText.transition().duration(750)
-              .attr("opacity", 1)
-              .attr("transform", function() { return "rotate(" + computeTextRotation(e) + ")" })
-              .attr("x", function(d) { return y(d.y); });
-          }
-      });
-  }
-});
-
-d3.select(self.frameElement).style("height", height + "px");
-
-// Interpolate the scales!
-function arcTween(d) {
-  var xd = d3.interpolate(x.domain(), [d.x, d.x + d.dx]),
-      yd = d3.interpolate(y.domain(), [d.y, 1]),
-      yr = d3.interpolate(y.range(), [d.y ? 20 : 0, radius]);
-  return function(d, i) {
-    return i
-        ? function(t) { return arc(d); }
-        : function(t) { x.domain(xd(t)); y.domain(yd(t)).range(yr(t)); return arc(d); };
-  };
-}
-
-function computeTextRotation(d) {
-  return (x(d.x + d.dx / 2) - Math.PI / 2) / Math.PI * 180;
-}
-
-</script>
+	<script type="text/x-handlebars">
+    	<h1>Illios Circumlum Visualizer</h1>
+    </script>
+</html>

@@ -5,7 +5,7 @@ require([
     'data/courses',
     'domready'
 ], 
-function(programs, programYears, cohorts, courses, domReady) 
+function(programs, programYears, cohorts, courses,  domReady) 
 {
 	var draw = function()
 	{
@@ -41,12 +41,29 @@ function(programs, programYears, cohorts, courses, domReady)
 
 
 
+
+
 		// Hardcoding paths
-		// Probably best way to do this is to bfs to find all child nodes
-		var arr1 = [programYears[30], programYears[42], programYears[43], programYears[66], programYears[67]];
-		var arr7 = [programYears[58], programYears[69]];
-		var arr = [{title: programs[1].title, children: arr1}, {title:programs[7].title, children: arr7}];
-		var pathObj = {title: "Root", children: arr}; // the full path
+		// Probably best way to do this is to bfs to find all child nodes	
+		var current_layer = [];
+
+
+		for(var p in programs){
+			var individual_p = programs[p]; // ["PH","M"]
+			var program_year_ids = individual_p.programYears; // ['58','69'] contains indicies
+			var py_branch = [];
+
+			// use individual indicies to get program years
+			for (var i = 0; i < program_year_ids.length; i++) {
+				p_id = program_year_ids[i];
+				py_branch.push(programYears[p_id]);
+			};
+			current_layer.push({title: individual_p.title, children: py_branch});
+		};
+
+
+
+		var pathObj = {title: "Root", children: current_layer}; // the full path
 
 
 		var node; // keeps track of node that is currently being displayed as the root
@@ -106,6 +123,7 @@ function(programs, programYears, cohorts, courses, domReady)
 
 		  function click(d) {
 		    node = d;
+		    console.log(current_layer);
 		    console.log(d.title);
 		    path.transition()
 		      .duration(1000)

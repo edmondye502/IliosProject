@@ -16,16 +16,16 @@ function(programs, programYears, cohorts, courses, competencies, domReady)
 	    radius = Math.min(width, height) / 2;
 
 		var x = d3.scale.linear()
-		    .range([0, 2 * Math.PI]);
+		    .range([0, 2*Math.PI]);
 
-		var y = d3.scale.sqrt()
+		var y = d3.scale.linear()
 		    .range([0, radius]);
 
 		var color = d3.scale.category20c();
 
 		var svg = d3.select("body").append("svg")
-		    .attr("width", width)
-		    .attr("height", height)
+		    .attr("width", width+100)
+		    .attr("height", height+100)
 		  .append("g")
 		    .attr("transform", "translate(" + width / 2 + "," + (height / 2 + 10) + ")");
 
@@ -33,103 +33,47 @@ function(programs, programYears, cohorts, courses, competencies, domReady)
 		    .sort(null)
 		    .value(function(d) { return 1; });
 
+		// console.log(cohortToProgramTitle(cohorts[41]));
+		// console.log(cohortToCourses(cohorts[41]));
+		// console.log(cohortToCompetencies(41));
+		// console.log(allProgramTitles());
+		// console.log(allCohortsIDs());
+		//console.log(programTitleToAssociatedID("MD"));
+		// console.log(cohortToProgramId(57));
+		// console.log(programChildren(1));
+		// console.log(buildRoot());
+
+		var current_layer = buildRoot();
+		var root = {title: "hi", children: current_layer}; // the full path
+
+		var g = svg.selectAll("g")
+		      .data(partition.nodes(root))
+		    .enter().append("g");
 
 		var arc = d3.svg.arc()
 		    .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x))); })
 		    .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx))); })
 		    .innerRadius(function(d) { return Math.max(0, y(d.y)); })
 		    .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
-
-
-
-
-
-		// Hardcoding paths
-		// Probably best way to do this is to bfs to find all child nodes	
-		var current_layer = [];
-
-
-		for(var p in programs){
-			var individual_p = programs[p]; // ["PH","M"]
-			var program_year_ids = individual_p.programYears; // ['58','69'] contains indicies
-			var py_branch = [];
-
-			// use individual indicies to get program years
-			for (var i = 0; i < program_year_ids.length; i++) {
-				p_id = program_year_ids[i];
-				py_branch.push(programYears[p_id]);
-			};
-			current_layer.push({title: individual_p.title, children: py_branch});
-		};
-
-
-		// for(var p in programs){
-		// 	var individual_p = programs[p]; // ["PH","M"]
-		// 	var program_year_ids = individual_p.programYears; // ['58','69'] contains indicies
-		// 	var py_branch = [];
-
-		// 	// use individual indicies to get program years
-		// 	for (var i = 0; i < program_year_ids.length; i++) {
-		// 		p_id = program_year_ids[i];
-
-		// 		// use p_index to get that program year's array of competency indicies
-		// 		competency_ids = programYears[p_id].competencies;
-		// 		var c_titles = [];
-
-		// 		// use competency_ids to get individual competency titles
-		// 		for (var i = 0; i < competency_ids.length; i++) {
-		// 			c_id = competency_ids[i];
-		// 			c_titles.push(competencies[c_id].title);
-		// 		};
-		// 		py_branch.push({title: programYears[p_id].id, children: c_titles});
-		// 	};
-		// 	current_layer.push({title: individual_p.title, children: py_branch});
-		// };
-
-
-
-		var pathObj = {title: "Root", children: current_layer}; // the full path
-
-
-		var node; // keeps track of node that is currently being displayed as the root
-
-		var root = pathObj;
-		
-		node = root;
-
-		// original
-		// draw the sections of the sunburst using the path
-		// var path = svg.datum(root).selectAll("path")
-		//   	.data(partition.nodes).enter()
-		//  	.append("path")
-		//     .attr("id", function(d, i) { return "path-" + i; })
-	    // .attr("d", arc)
-		//  .style("fill", function(d) { return color((d.children ? d : d.parent).title); })
-		//  .on("click", click)
-		//  .each(stash);
-
-		var g = svg.selectAll("g")
-		      .data(partition.nodes(root))
-		    .enter().append("g");
-
-	
-
-		  // new
+		  
 		  var path = g.append("path")
 		    .attr("d", arc)
 		    .style("fill", function(d) { return color((d.children ? d : d.parent).title); })
-		    .on("click", click);
+		    .on("click", click)
+		    .style("stroke", "black");
 
-
-		  var text = g.append("text")
-		    .attr("transform", function(d) { return "rotate(" + computeTextRotation(d) + ")"; })
-		    .attr("x", function(d) { return y(d.y); })
-		    .attr("dx", "6") // margin
-		    .attr("dy", ".35em") // vertical-align
-		    .text(function(d) { return d.title; });
+		 var text = g.append("text")
+	        .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")rotate(" + computeTextRotation(d) + ")"; })
+	        .attr('text-anchor', function (d) { return computeTextRotation(d) < 180 ? "end" : "start"; })
+	        //.attr("dx", "6") // margin
+	        .attr("dy", ".35em") // vertical-align
+	        .style("font-size", "8px")
+	        .text(function(d) { return d.title; });
+		
 
 		    function click(d) 
 		    	{
+		    		//console.log(g);
 			    // fade out all text elements
 			    text.transition().attr("opacity", 0);
 
@@ -144,9 +88,11 @@ function(programs, programYears, cohorts, courses, competencies, domReady)
 	            // fade in the text element and recalculate positions
 	            arcText.transition().duration(750)
 	              .attr("opacity", 1)
+	              
 	              .attr("transform", function() { return "rotate(" + computeTextRotation(e) + ")" })
 	              .attr("x", function(d) { return y(d.y); });
-          }
+
+          		}
       });
   }
 		
@@ -165,10 +111,99 @@ function(programs, programYears, cohorts, courses, competencies, domReady)
 		        : function(t) { x.domain(xd(t)); y.domain(yd(t)).range(yr(t)); return arc(d); };
 		  };
 		}
-
 		function computeTextRotation(d) {
-		  return (x(d.x + d.dx / 2) - Math.PI / 2) / Math.PI * 180;
+		        var ang = (x(d.x + d.dx / 2) - Math.PI / 2) / Math.PI * 180;
+		        return (ang > 90) ?  180 + ang : ang;
+    	}
+
+    	function cohortToProgramTitle(cid){
+    		py = programYears[cid.programYear];
+    		return programs[py.program].title;
+    	}
+
+    	function cohortToProgramId(cid){
+    		//cohorts[c].programYear;
+    		py = programYears[cohorts[cid].programYear];
+    		return py.program;
+    	}
+
+    	// chagne to title
+    	function cohortToCourses(cid){
+    		course_ids = cid.courses; //arr
+    		course_names = [];
+    		for (i = 0; i < course_ids.length; i++){
+    			course_names.push(courses[course_ids[i]].title);
+    		}
+    		return course_names;
+    	}
+
+    	function cohortToCompetencies(cid){
+    		coh = cohorts[cid];
+    		py = programYears[coh.programYear];
+    		competency_ids = py.competencies;
+    		competency_titles = [];
+    		for (var i = 0; i < competency_ids.length; i++) {
+    			competency_titles.push(competencies[competency_ids[i]]); 
+    		}
+    		return competency_titles;
+    	}
+
+    	function allProgramTitles(){
+    		p_titles = [];
+    		for(var i in programs){
+    			p_titles.push(programs[i].shortTitle);
+    		}
+    		return p_titles;
+    	}
+
+    	function programTitleToAssociatedID(p_title){
+    		for(var i in programs){
+    			if(programs[i].shortTitle == p_title){
+    				return programs[i].id; 
+    			}
+    		}
+    	}
+
+    	function allCohortsIDs(){
+    		c_ids = [];
+    		for(var i in cohorts){
+    			c_ids.push(cohorts[i].id);
+    		}
+    		return c_ids;
+
+    	}
+
+    	
+		function programChildren(pid){
+    		c_ids = allCohortsIDs();
+    		matching_cohorts = [];
+    		for (var i = 0; i < c_ids.length; i++){
+				if(pid== cohortToProgramId(c_ids[i])){
+					matching_cohorts.push(c_ids[i]);			
+				}		
+			}	
+			return matching_cohorts;
 		}
+
+    	function buildRoot(){
+    		var root = [];
+    		p_titles = allProgramTitles(); // Pharm/MD
+    		for (var i = 0; i < p_titles.length; i++){
+    			var pid = programTitleToAssociatedID(p_titles[i]);
+    			c_ids = programChildren(pid);
+    			cohort_layer = []
+    			for (var j = 0; j < c_ids.length; j++) {
+    				cohort_layer.push({title: cohorts[c_ids[j]].title, children: cohortToCompetencies(c_ids[j])});
+    			};
+
+
+
+
+    			root.push({title: p_titles[i], children: cohort_layer}); // program -> cid  
+    		}
+    		return root;
+    	}
+
 	};
 
 

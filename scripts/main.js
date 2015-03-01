@@ -23,11 +23,13 @@ function(programs, programYears, cohorts, courses, competencies, domReady)
 
 		var color = d3.scale.category20c();
 
-		var svg = d3.select("body").append("svg")
-		    .attr("width", width+100)
-		    .attr("height", height+100)
-		  .append("g")
-		    .attr("transform", "translate(" + width / 2 + "," + (height / 2 + 10) + ")");
+
+		var svg = d3.select("body")
+			.append("svg")
+		    	.attr("width", width+100)
+		    	.attr("height", height+100)
+		    .append("g")
+		    	.attr("transform", "translate(" + width / 2 + "," + (height / 2 + 10) + ")");
 
 		var partition = d3.layout.partition()
 		    .sort(null)
@@ -47,7 +49,7 @@ function(programs, programYears, cohorts, courses, competencies, domReady)
 		var root = {title: "hi", children: current_layer}; // the full path
 
 		var g = svg.selectAll("g")
-		      .data(partition.nodes(root))
+		    .data(partition.nodes(root))
 		    .enter().append("g");
 
 		var arc = d3.svg.arc()
@@ -71,31 +73,35 @@ function(programs, programYears, cohorts, courses, competencies, domReady)
 	        .text(function(d) { return d.title; });
 		
 
-		    function click(d) 
-		    	{
-		    		//console.log(g);
-			    // fade out all text elements
-			    text.transition().attr("opacity", 0);
+	    function click(d) 
+	    	{
+	    		//console.log(g);
+		    // fade out all text elements
+		    text.transition().attr("opacity", 0);
 
-			    path.transition()
-			      .duration(750)
-			      .attrTween("d", arcTween(d))
-			      .each("end", function(e, i) {
-	         	 // check if the animated element's data e lies within the visible angle span given in d
-	         	if (e.x >= d.x && e.x < (d.x + d.dx)) {
-	            // get a selection of the associated text element
-	            var arcText = d3.select(this.parentNode).select("text");
-	            // fade in the text element and recalculate positions
-	            arcText.transition().duration(750)
-	              .attr("opacity", 1)
-	              
-	              .attr("transform", function() { return "rotate(" + computeTextRotation(e) + ")" })
-	              .attr("x", function(d) { return y(d.y); });
+		    path.transition()
+		      .duration(750)
+		      .attrTween("d", arcTween(d))
+		      .each("end", function(e, i) {
+		         	 // check if the animated element's data e lies within the visible angle span given in d
+		         	if (e.x >= d.x && e.x < (d.x + d.dx)) 
+		         	{
+		            // get a selection of the associated text element
+		            var arcText = d3.select(this.parentNode).select("text");
+		            // fade in the text element and recalculate positions
+		            arcText.transition().duration(750)
+		              .attr("opacity", 1)
+		              
+		              .attr("transform", function() { return "rotate(" + computeTextRotation(e) + ")" })
+		              .attr("x", function(d) { return y(d.y); });
 
-          		}
-      });
-  }
-		
+		            // UPDATE BREADCRUMBS!!!
+		            updateBreadcrumbs(getAncestors(d));
+
+      				}
+  				});
+				}
+	
 
 		d3.select(self.frameElement).style("height", height + "px");
 
@@ -204,6 +210,104 @@ function(programs, programYears, cohorts, courses, competencies, domReady)
     		return root;
     	}
 
+    	initializeBreadcrumbTrail();
+
+    	// Breadcrumb default dimensions: width, height, spacing, width of tip/tail.
+		var b = {
+		  w: 75, h: 30, s: 5, t: 10
+		};
+
+		var bWidths = [];
+
+		function getAncestors(node) {
+		  var path = [];
+		  var current = node;
+		  while (current.parent) {
+		    path.unshift(current);
+		    current = current.parent;
+		  }
+		  return path;
+		}
+
+		function initializeBreadcrumbTrail() {
+		  // Add the svg area.
+		  var trail = d3.select("#sequence").append("svg:svg")
+		      .attr("width", width)
+		      .attr("height", 50)
+		      .attr("id", "trail");
+		}
+
+		var addWidth = 0;
+
+    	// Generate a string that describes the points of a breadcrumb polygon.
+		function breadcrumbPoints(d, i) {
+		  var points = [];
+		 
+		  addWidth = 0;
+		  if(d.title.length * 10 > b.w)
+		  {
+		  	// extra width to add to the breadcrumb's default width in order to fit node text
+		  	addWidth = (d.title.length * 15) - b.w;
+		  }
+		  
+		  bWidths.push(b.w + addWidth);
+
+		  points.push("0,0");
+		  points.push((b.w + addWidth) + ",0");
+		  points.push((b.w + addWidth) + b.t + "," + (b.h / 2));
+		  points.push((b.w + addWidth) + "," + b.h);
+		  points.push("0," + b.h);
+		  if (i > 0) { // Leftmost breadcrumb; don't include 6th vertex.
+		    points.push(b.t + "," + (b.h / 2));
+		  }
+
+		  return points.join(" ");
+		}
+
+		// Update the breadcrumb trail to show the current sequence.
+		function updateBreadcrumbs(nodeArray) {
+
+		  // Reset widths of the current trail if at root node
+		  if (nodeArray.length == 0)
+		  {
+		  	  bWidths = [];
+		  }
+			
+		  // Data join
+		  var g = d3.select("#trail")
+		      .selectAll("g")
+		      .data(nodeArray, function(d) { return d.title; });
+
+		  // Add breadcrumb and label for entering nodes.
+		  var entering = g.enter().append("svg:g");
+
+		  entering.append("svg:polygon")
+		      .attr("points", breadcrumbPoints)
+		      .style("fill", function(d) { return color((d.children ? d : d.parent).title); });
+
+		  entering.append("svg:text")
+		      .attr("x", function(d, i) { return ((bWidths[i] + b.t) / 2) })
+		      .attr("y", b.h / 2)
+		      .attr("dy", "0.35em")
+		      .attr("text-anchor", "middle")
+		      .text(function(d) { return d.title; });
+
+		  // Set position for entering and updating nodes.
+		  g.attr("transform", function(d, i) {
+		  	var newWidthPos = 0;
+	  		for (var x = 0; x < i; x++)
+	  		{
+	  			newWidthPos = newWidthPos + bWidths[x] + b.s;
+	  
+	  		}
+		  	
+		    return "translate(" + newWidthPos + ", 0)";
+		  });
+
+		  // Remove exiting nodes.
+		  g.exit().remove();
+
+		}
 	};
 
 

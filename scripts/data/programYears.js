@@ -1,6 +1,6 @@
 define({
   30: {
-    'title' : 30,
+    'id' : 30,
     'startYear' : "2013",
     'deleted' : true,
     'locked' : false,
@@ -14,7 +14,7 @@ define({
   },
 
   42: {
-    'title' : 42,
+    'id' : 42,
     'startYear' : "2013",
     'deleted' : false,
     'locked' : false,
@@ -30,7 +30,7 @@ define({
   },
 
   43: {
-    'title' : 43,
+    'id' : 43,
     'startYear' : "2014",
     'deleted' : true,
     'locked' : false,
@@ -45,7 +45,7 @@ define({
   },
 
   58: {
-    'title' : 58,
+    'id' : 58,
     'startYear' : "2013",
     'deleted' : false,
     'locked' : false,
@@ -61,7 +61,7 @@ define({
   },
 
   66: {
-    'title' : 66,
+    'id' : 66,
     'startYear' : "2014",
     'deleted' : true,
     'locked' : false,
@@ -76,7 +76,7 @@ define({
   },
 
   67: {
-    'title' : 67,
+    'id' : 67,
     'startYear' : "2014",
     'deleted' : false,
     'locked' : false,
@@ -92,7 +92,7 @@ define({
   },
 
   69: {
-    'title' : 69,
+    'id' : 69,
     'startYear' : "2014",
     'deleted' : false,
     'locked' : false,

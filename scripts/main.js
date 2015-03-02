@@ -18,8 +18,7 @@ function(programs, programYears, cohorts, courses, competencies, domReady)
 		var x = d3.scale.linear()
 		    .range([0, 2*Math.PI]);
 
-		var y = d3.scale.linear()
-		    .range([0, radius]);
+		var y = d3.scale.pow().exponent(1.3).domain([0,1]).range([0,radius]);
 
 		var color = d3.scale.category20c();
 

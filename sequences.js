@@ -175,7 +175,7 @@ function zoomIn(d)
       .attr("display", function(d) { return d.depth ? null : "none"; })
       .attr("d", arc)
       .attr("fill-rule", "evenodd")
-      .style("fill", function(d) { return colors[d.name]; })
+      .style("fill", function(d) { return randomColor(); })
       .style("opacity", 1)
       .on("mouseover", mouseover)
       .on("click", click)
@@ -204,7 +204,7 @@ function zoomOut(){
       .attr("display", function(d) { return d.depth ? null : "none"; })
       .attr("d", arc)
       .attr("fill-rule", "evenodd")
-      .style("fill", function(d) { return colors["home"]; })
+      .style("fill", function(d) { return randomColor(); })
       .style("opacity", 1)
       .on("mouseover", mouseover)
       .on("click", click)
@@ -415,7 +415,6 @@ function toggleLegend() {
 
 
 function randomColor(){
-  console.log(Math.floor((Math.random() * colors.length) ));
   return colors[Math.floor((Math.random() * colors.length) )];
 }
 

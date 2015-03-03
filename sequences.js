@@ -9,14 +9,14 @@ var b = {
 };
 
 // Mapping of step names to colors.
-var colors = {
-  "home": "#5687d1",
-  "product": "#7b615c",
-  "search": "#de783b",
-  "account": "#6ab975",
-  "other": "#a173d1",
-  "end": "#bbbbbb"
-};
+// var colors = {
+//   "programs": "#5687d1",
+//   "cohorts": "#7b615c",
+//   "courses": "#de783b",
+//   "objectives": "#6ab975"
+// };
+
+var colors = ["#5687d1", "#7b615c", "#de783b", "#6ab975"];
 
 // Total size of all segments; we set this later, after loading the data.
 var totalSize = 0; 
@@ -125,7 +125,7 @@ function createVisualization(json) {
       .attr("display", function(d) { return d.depth ? null : "none"; })
       .attr("d", arc)
       .attr("fill-rule", "evenodd")
-      .style("fill", function(d) { return colors[d.name]; })
+      .style("fill", function(d) { return randomColor(); })
       .style("opacity", 1)
       .on("mouseover", mouseover)
       .on("click", click);
@@ -204,7 +204,7 @@ function zoomOut(){
       .attr("display", function(d) { return d.depth ? null : "none"; })
       .attr("d", arc)
       .attr("fill-rule", "evenodd")
-      .style("fill", function(d) { return colors[d.name]; })
+      .style("fill", function(d) { return colors["home"]; })
       .style("opacity", 1)
       .on("mouseover", mouseover)
       .on("click", click)
@@ -413,6 +413,11 @@ function toggleLegend() {
   }
 }
 
+
+function randomColor(){
+  console.log(Math.floor((Math.random() * colors.length) ));
+  return colors[Math.floor((Math.random() * colors.length) )];
+}
 
  function arcTween(a){
                     var i = d3.interpolate({x: a.x0, dx: a.dx0}, a);

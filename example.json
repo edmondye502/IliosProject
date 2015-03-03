@@ -1,0 +1,44 @@
+{
+ "name": "Ilios Circumlum Visualizer",
+ "children": [
+	{"name":"Medicine",
+	 "children":[
+		{
+		  "name":"Year One",
+		  "children":[
+		  {"name":"Biochemistry","size": 4000},
+		  {"name":"Clinical Skills 1","size": 4000},
+		  {"name":"Cell Biology ADV","size": 2000},
+		  {"name":"Holistic Health","size": 2100}
+		  ]
+
+		},
+		{
+		  "name":"Year Two",
+		  "children":[
+		  {"name":"Family Medicine","size": 3100},
+		  {"name":"Cancer Fundamentals","size": 1900},
+		  {"name":"Emergency Medicine","size": 6000}
+		  ]
+
+		}]},
+	{"name":"Pharmacy",
+	 "children":[
+		{
+		  "name":"Year Three",
+		  "children":[
+		  {"name":"Public Health","size": 3909},
+		  {"name":"Electronic Health","size": 4600}
+		  ]
+
+		},
+		{
+		  "name":"Year Four",
+		  "children":[
+		  {"name":"FamilyMedicine","size": 3990},
+		  {"name":"Intership","size": 4000}
+		  ]
+
+		}]}
+ ]
+}

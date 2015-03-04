@@ -54,6 +54,55 @@ function(programs, programYears, cohorts, courses, competencies, objectives, dom
      
     var oldStructure = {}; 	
     	
+    	
+    // Use d3.text and d3.csv.parseRows so that we do not need to have a header
+    // row, and can receive the csv as an array of arrays.
+
+
+    //   var json = {
+    //  "title": "Ilios Circumlum Visualizer",
+    //  "children": [
+    // 	{"title":"Medicine",
+    // 	 "children":[
+    // 		{
+    // 		  "title":"Year One",
+    // 		  "children":[
+    // 		  {"title":"Biochemistry"},
+    // 		  {"title":"Clinical Skills 1"},
+    // 		  {"title":"Cell Biology ADV"},
+    // 		  {"title":"Holistic Health"}
+    // 		  ]
+
+    // 		},
+    // 		{
+    // 		  "title":"Year Two",
+    // 		  "children":[
+    // 		  {"title":"Family Medicine"},
+    // 		  {"title":"Cancer Fundamentals"},
+    // 		  {"title":"Emergency Medicine"}
+    // 		  ]
+
+    // 		}]},
+    // 	{"title":"Pharmacy",
+    // 	 "children":[
+    // 		{
+    // 		  "title":"Year Three",
+    // 		  "children":[
+    // 		  {"title":"Public Health"},
+    // 		  {"title":"Electronic Health"}
+    // 		  ]
+
+    // 		},
+    // 		{
+    // 		  "title":"Year Four",
+    // 		  "children":[
+    // 		  {"title":"FamilyMedicine"},
+    // 		  {"title":"Intership"}
+    // 		  ]
+
+    // 		}]}
+    //  ]
+    // }
       var json = buildRoot(); 
       console.log(json);
       createVisualization(json);
@@ -207,7 +256,7 @@ function(programs, programYears, cohorts, courses, competencies, objectives, dom
           .style("visibility", "");
 
       var sequenceArray = getAncestors(d);
-      updateBreadcrumbs(sequenceArray, percentageString);
+      updateBreadcrumbs(sequenceArray);
 
       // Fade all the segments.
       d3.selectAll("path")
@@ -251,6 +300,20 @@ function(programs, programYears, cohorts, courses, competencies, objectives, dom
     	  .style("visibility","visible");
     }
 
+
+    // Breadcrumb default dimensions: width, height, spacing, width of tip/tail, 
+        //multiplier to increase width of breadcrumb based on length of d.title
+    var b = {
+      w: 75, h: 30, s: 5, t: 10, m: 10
+    };
+
+    // Holds the width of all the nodes in the current path
+    var bWidths = [];
+
+    // Minimum width of a breadcrumb is defined by b.w; 
+      //addWidth will increase the length of a breadcrumb width based on d.title
+    var addWidth = 0;
+
     // Given a node in a partition layout, return an array of all of its ancestor
     // nodes, highest first, but excluding the root.
     function getAncestors(node) {
@@ -269,43 +332,67 @@ function(programs, programYears, cohorts, courses, competencies, objectives, dom
           .attr("width", width)
           .attr("height", 50)
           .attr("id", "trail");
-      // Add the label at the end, for the percentage.
-      trail.append("svg:text")
-        .attr("id", "endlabel")
-        .style("fill", "#000");
-    }
+      }
 
     // Generate a string that describes the points of a breadcrumb polygon.
     function breadcrumbPoints(d, i) {
       var points = [];
+     
+      calculateWidths(d);
+
       points.push("0,0");
-      points.push(b.w + ",0");
-      points.push(b.w + b.t + "," + (b.h / 2));
-      points.push(b.w + "," + b.h);
+      points.push((b.w + addWidth) + ",0");
+      points.push((b.w + addWidth) + b.t + "," + (b.h / 2));
+      points.push((b.w + addWidth) + "," + b.h);
       points.push("0," + b.h);
       if (i > 0) { // Leftmost breadcrumb; don't include 6th vertex.
         points.push(b.t + "," + (b.h / 2));
       }
+
       return points.join(" ");
     }
 
-    // Update the breadcrumb trail to show the current sequence and percentage.
-    function updateBreadcrumbs(nodeArray, percentageString) {
+    function calculateWidths(d) {
 
-      // Data join; key function combines title and depth (= position in sequence).
+      addWidth = 0;
+      if(d.title.length * 10 > b.w)
+      {
+        // extra width to add to the breadcrumb's default width in order to fit node text
+        addWidth = (d.title.length * b.m) - b.w;
+      }
+
+      bWidths.push(b.w + addWidth);
+    }
+
+    // Update the breadcrumb trail to show the current sequence
+    function updateBreadcrumbs(nodeArray) {
+
+      // // Reset widths of the current trail if at root node
+      if (bWidths.length >= nodeArray.length)
+      {
+        // recaluclate new bWidths
+        bWidths = [];
+        for(var i = 0; i < nodeArray.length; i++)
+        {
+          calculateWidths(nodeArray[i]);
+        }
+      }
+
+      // Data join
       var g = d3.select("#trail")
           .selectAll("g")
-          .data(nodeArray, function(d) { return d.title + d.depth; });
+          .data(nodeArray, function(d) { return d.title; });
 
       // Add breadcrumb and label for entering nodes.
       var entering = g.enter().append("svg:g");
 
       entering.append("svg:polygon")
           .attr("points", breadcrumbPoints)
-          .style("fill", function(d) { return colors[d.title]; });
+          .style("fill", function(d) { return randomColor(); })
+          .style("stroke", "black");
 
       entering.append("svg:text")
-          .attr("x", (b.w + b.t) / 2)
+          .attr("x", function(d, i) { return ((bWidths[i] + b.t) / 2)})
           .attr("y", b.h / 2)
           .attr("dy", "0.35em")
           .attr("text-anchor", "middle")
@@ -313,19 +400,19 @@ function(programs, programYears, cohorts, courses, competencies, objectives, dom
 
       // Set position for entering and updating nodes.
       g.attr("transform", function(d, i) {
-        return "translate(" + i * (b.w + b.s) + ", 0)";
+        var newWidthPos = 0;
+        for (var x = 0; x < i; x++)
+        {
+          newWidthPos = newWidthPos + bWidths[x] + b.s;
+    
+        }
+        
+        return "translate(" + newWidthPos + ", 0)";
       });
 
       // Remove exiting nodes.
       g.exit().remove();
 
-      // Now move and update the percentage at the end.
-      d3.select("#trail").select("#endlabel")
-          .attr("x", (nodeArray.length + 0.5) * (b.w + b.s))
-          .attr("y", b.h / 2)
-          .attr("dy", "0.35em")
-          .attr("text-anchor", "middle")
-          .text(percentageString);
 
       // Make the breadcrumb trail visible, if it's hidden.
       d3.select("#trail")

@@ -54,55 +54,6 @@ function(programs, programYears, cohorts, courses, competencies, objectives, dom
      
     var oldStructure = {}; 	
     	
-    	
-    // Use d3.text and d3.csv.parseRows so that we do not need to have a header
-    // row, and can receive the csv as an array of arrays.
-
-
-    //   var json = {
-    //  "title": "Ilios Circumlum Visualizer",
-    //  "children": [
-    // 	{"title":"Medicine",
-    // 	 "children":[
-    // 		{
-    // 		  "title":"Year One",
-    // 		  "children":[
-    // 		  {"title":"Biochemistry"},
-    // 		  {"title":"Clinical Skills 1"},
-    // 		  {"title":"Cell Biology ADV"},
-    // 		  {"title":"Holistic Health"}
-    // 		  ]
-
-    // 		},
-    // 		{
-    // 		  "title":"Year Two",
-    // 		  "children":[
-    // 		  {"title":"Family Medicine"},
-    // 		  {"title":"Cancer Fundamentals"},
-    // 		  {"title":"Emergency Medicine"}
-    // 		  ]
-
-    // 		}]},
-    // 	{"title":"Pharmacy",
-    // 	 "children":[
-    // 		{
-    // 		  "title":"Year Three",
-    // 		  "children":[
-    // 		  {"title":"Public Health"},
-    // 		  {"title":"Electronic Health"}
-    // 		  ]
-
-    // 		},
-    // 		{
-    // 		  "title":"Year Four",
-    // 		  "children":[
-    // 		  {"title":"FamilyMedicine"},
-    // 		  {"title":"Intership"}
-    // 		  ]
-
-    // 		}]}
-    //  ]
-    // }
       var json = buildRoot(); 
       console.log(json);
       createVisualization(json);

@@ -302,9 +302,9 @@ function(programs, programYears, cohorts, courses, competencies, objectives, dom
 
 
     // Breadcrumb default dimensions: width, height, spacing, width of tip/tail, 
-        //multiplier to increase width of breadcrumb based on length of d.title
+        //multiplier to increase width of breadcrumb based on length of d.title (m >= 7)
     var b = {
-      w: 75, h: 30, s: 5, t: 10, m: 10
+      w: 75, h: 30, s: 5, t: 10, m: 8
     };
 
     // Holds the width of all the nodes in the current path
@@ -355,7 +355,7 @@ function(programs, programYears, cohorts, courses, competencies, objectives, dom
     function calculateWidths(d) {
 
       addWidth = 0;
-      if(d.title.length * 10 > b.w)
+      if(d.title.length * b.m > b.w)
       {
         // extra width to add to the breadcrumb's default width in order to fit node text
         addWidth = (d.title.length * b.m) - b.w;

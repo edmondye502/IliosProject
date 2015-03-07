@@ -12,18 +12,10 @@ function(root, domReady)
     var height = 600;
     var radius = Math.min(width, height) / 2;
 
-    // Mapping of step titles to colors.
-    // var colors = {
-    //   "programs": "#5687d1",
-    //   "cohorts": "#7b615c",
-    //   "courses": "#de783b",
-    //   "objectives": "#6ab975"
-    // };
 
-    var colors = ["#5687d1", "#7b615c", "#de783b", "#6ab975"];
-
-    // Total size of all segments; we set this later, after loading the data.
-    var totalSize = 0; 
+    //var color = d3.scale.category10();
+    var color = ["#1f77b4", "#32cd32","#aec7e8", "#9467bd",
+    "#7f7f7f", "#17becf", "#756bb1", "#9e9ac8"];
 
     var vis = d3.select("#chart").append("svg:svg")
         .attr("width", width)
@@ -34,7 +26,7 @@ function(root, domReady)
 
     var partition = d3.layout.partition()
         .size([2 * Math.PI, radius * radius])
-        .value(function(d) { return 1000 });
+        .value(function(d) { return d.size;});
 
     var arc = d3.svg.arc()
         .startAngle(function(d) { return d.x; })
@@ -43,11 +35,7 @@ function(root, domReady)
         .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
      
     var oldStructure = {}; 	
-    	
-    	
-    
     var json = root(); 
-    //console.log(json);
     createVisualization(json);
 
 
@@ -56,8 +44,6 @@ function(root, domReady)
 
       // Basic setup of page elements.
       initializeBreadcrumbTrail();
-      drawLegend();
-      d3.select("#togglelegend").on("click", toggleLegend);
       oldStructure = json; 
 
       // Bounding circle underneath the sunburst, to make it easier to detect
@@ -69,13 +55,9 @@ function(root, domReady)
     	  
     	  
       // start with text in middle
-      d3.select("#percentage")
+      d3.select("#center")
           .text("Ilios Visualizer")
     	  
-    	  
-
-      // For efficiency, filter nodes to keep only those large enough to see.
-      // MAY NEED TO CHANGE **************
       var nodes = partition.nodes(json);
 
       var path = vis.data([json]).selectAll("path")
@@ -84,19 +66,14 @@ function(root, domReady)
           .attr("display", function(d) { return d.depth ? null : "none"; })
           .attr("d", arc)
           .attr("fill-rule", "evenodd")
-          .style("fill", function(d) { return randomColor(); })
+          .style("fill", function(d) { return pickColor(d)})
           .style("opacity", 1)
           .on("mouseover", mouseover)
           .on("click", click);
+	
 
-
-
-    	
       // Add the mouseleave handler to the bounding circle.
       d3.select("#container").on("mouseleave", mouseleave) ;
-
-      // Get total size of the tree = value of root node from partition.
-      totalSize = path.node().__data__.value;
      };
 
      function click(d){
@@ -129,7 +106,7 @@ function(root, domReady)
           .attr("display", function(d) { return d.depth ? null : "none"; })
           .attr("d", arc)
           .attr("fill-rule", "evenodd")
-          .style("fill", function(d) { return randomColor(); })
+          .style("fill", function(d) { return pickColor(d)})
           .style("opacity", 1)
           .on("mouseover", mouseover)
           .on("click", click)
@@ -137,8 +114,6 @@ function(root, domReady)
           .transition()
           .duration(750)
           .attrTween("d", arcTween);
-      // Get total size of the tree = value of root node from partition.
-      totalSize = path.node().__data__.value;
     }
 
     function zoomOut(){
@@ -148,7 +123,7 @@ function(root, domReady)
 
       sections.remove();
       
-      d = oldStructure; // ONLY DIFFERENCE
+      var d = oldStructure; // ONLY DIFFERENCE
       var nodes = partition.nodes(d);
       
       
@@ -158,7 +133,7 @@ function(root, domReady)
           .attr("display", function(d) { return d.depth ? null : "none"; })
           .attr("d", arc)
           .attr("fill-rule", "evenodd")
-          .style("fill", function(d) { return randomColor(); })
+          .style("fill", function(d) { return pickColor(d)})     
           .style("opacity", 1)
           .on("mouseover", mouseover)
           .on("click", click)
@@ -167,10 +142,7 @@ function(root, domReady)
           .duration(750)
           .attrTween("d", arcTween);
       // Set next zoom out structure to the parent node		
-      oldStructure = oldStructure.parent
-    	
-      // Get total size of the tree = value of root node from partition.
-      totalSize = path.node().__data__.value;	
+      oldStructure = d.parent
     }
 
 
@@ -184,15 +156,8 @@ function(root, domReady)
 
     // Fade all but the current sequence, and show it in the breadcrumb trail.
     function mouseover(d) {
-
-      var percentage = (100 * d.value / totalSize).toPrecision(3);
-      var percentageString = percentage + "%";
-      if (percentage < 0.1) {
-        percentageString = "< 0.1%";
-      }
-
       // change text in middle circle to reflect title of node
-      d3.select("#percentage")
+      d3.select("#center")
           .text(d.title);
 
       d3.select("#explanation")
@@ -226,7 +191,7 @@ function(root, domReady)
       // Transition each segment to full opacity and then reactivate it.
       d3.selectAll("path")
           .transition()
-          .duration(1000)
+          .duration(300)
           .style("opacity", 1)
           .each("end", function() {
                   d3.select(this).on("mouseover", mouseover);
@@ -238,9 +203,9 @@ function(root, domReady)
           .style("visibility", "hidden");
     	  
       // return to basic text in middle when mouse leaves
-      d3.select("#percentage")
-          .text("Ilios Visualizer")
-    	  .style("visibility","visible");
+      // d3.select("#center")
+      //     .text("Ilios Visualizer")
+    	 //  .style("visibility","visible");
     }
 
 
@@ -331,7 +296,7 @@ function(root, domReady)
 
       entering.append("svg:polygon")
           .attr("points", breadcrumbPoints)
-          .style("fill", function(d) { return randomColor(); })
+          .style("fill", function(d) { return pickColor(d)})
           .style("stroke", "black");
 
       entering.append("svg:text")
@@ -363,52 +328,6 @@ function(root, domReady)
 
     }
 
-    function drawLegend() {
-
-      // Dimensions of legend item: width, height, spacing, radius of rounded rect.
-      var li = {
-        w: 75, h: 30, s: 3, r: 3
-      };
-
-      var legend = d3.select("#legend").append("svg:svg")
-          .attr("width", li.w)
-          .attr("height", d3.keys(colors).length * (li.h + li.s));
-
-      var g = legend.selectAll("g")
-          .data(d3.entries(colors))
-          .enter().append("svg:g")
-          .attr("transform", function(d, i) {
-                  return "translate(0," + i * (li.h + li.s) + ")";
-               });
-
-      g.append("svg:rect")
-          .attr("rx", li.r)
-          .attr("ry", li.r)
-          .attr("width", li.w)
-          .attr("height", li.h)
-          .style("fill", function(d) { return d.value; });
-
-      g.append("svg:text")
-          .attr("x", li.w / 2)
-          .attr("y", li.h / 2)
-          .attr("dy", "0.35em")
-          .attr("text-anchor", "middle")
-          .text(function(d) { return d.key; });
-    }
-
-    function toggleLegend() {
-      var legend = d3.select("#legend");
-      if (legend.style("visibility") == "hidden") {
-        legend.style("visibility", "");
-      } else {
-        legend.style("visibility", "hidden");
-      }
-    }
-
-
-    function randomColor(){
-      return colors[Math.floor((Math.random() * colors.length) )];
-    }
 
      function arcTween(a){
                         var i = d3.interpolate({x: a.x0, dx: a.dx0}, a);
@@ -425,11 +344,13 @@ function(root, domReady)
                         d.dx0 = 0; //d.dx;
                     }; 
 
+          function pickColor(d){
+        var title = d.title;
+        return color[title.length % (color.length)];
+      }
 
-
-
-    
   };
+
 
     domReady(function () 
   {

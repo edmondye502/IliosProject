@@ -13,6 +13,20 @@ function(root, domReady)
     var radius = Math.min(width, height) / 2;
 
 
+    // Breadcrumb default dimensions: width, height, spacing, width of tip/tail, 
+        //multiplier to increase width of breadcrumb based on length of d.title (m >= 7)
+    var b = {
+      w: 75, h: 30, s: 5, t: 10, m: 8
+    };
+
+    // Holds the width of all the nodes in the current path
+    var bWidths = [];
+
+    // Minimum width of a breadcrumb is defined by b.w; 
+      //addWidth will increase the length of a breadcrumb width based on d.title
+    var addWidth = 0;
+
+
     //var color = d3.scale.category10();
     // var color = ["#1f77b4", "#32cd32","#aec7e8", "#FFBF00",
     // "#7f7f7f", "#17becf", "#e7ba52", "#9e9ac8"];
@@ -63,8 +77,8 @@ function(root, domReady)
     function createVisualization(json) {
 
       // Basic setup of page elements.
-      initializeBreadcrumbTrail();
       oldStructure = json; 
+      initializeBreadcrumbTrail();
 
       // Bounding circle underneath the sunburst, to make it easier to detect
       // when the mouse leaves the parent g.
@@ -100,15 +114,19 @@ function(root, domReady)
       d3.select("#container").on("mouseleave", mouseleave) ;
      };
 
+
+
      function click(d){
     	if(arcHasChildren(d)){
+      		updateBreadcrumbs(getAncestors(d, true));
     		zoomIn(d);
     	}
      }
      
      function clickCenter(){
     	if(oldStructure){
-    	zoomOut()
+    		updateBreadcrumbs(getAncestors(oldStructure, true));
+    		zoomOut()
     	}
      }
      
@@ -154,7 +172,6 @@ function(root, domReady)
       // sections represents all 16 sections, 
 
       var sections = d3.select("#container").selectAll("path")
-
       sections.remove();
       
       var d = oldStructure; // ONLY DIFFERENCE
@@ -197,7 +214,6 @@ function(root, domReady)
           .style("opacity", 1);
     }
 
-    // Fade all but the current sequence, and show it in the breadcrumb trail.
     function mouseover(d) {
       // change text in middle circle to reflect title of node
       d3.select("#center")
@@ -207,7 +223,6 @@ function(root, domReady)
           .style("visibility", "");
 
       var sequenceArray = getAncestors(d);
-      updateBreadcrumbs(sequenceArray);
 
       // Fade all the segments.
       d3.selectAll("path")
@@ -224,9 +239,6 @@ function(root, domReady)
     // Restore everything to full opacity when moving off the visualization.
     function mouseleave(d) {
 
-      // Hide the breadcrumb trail
-      d3.select("#trail")
-          .style("visibility", "hidden");
 
       // Deactivate all segments during transition.
       d3.selectAll("path").on("mouseover", null);
@@ -252,27 +264,24 @@ function(root, domReady)
     }
 
 
-    // Breadcrumb default dimensions: width, height, spacing, width of tip/tail, 
-        //multiplier to increase width of breadcrumb based on length of d.title (m >= 7)
-    var b = {
-      w: 75, h: 30, s: 5, t: 10, m: 8
-    };
-
-    // Holds the width of all the nodes in the current path
-    var bWidths = [];
-
-    // Minimum width of a breadcrumb is defined by b.w; 
-      //addWidth will increase the length of a breadcrumb width based on d.title
-    var addWidth = 0;
 
     // Given a node in a partition layout, return an array of all of its ancestor
-    // nodes, highest first, but excluding the root.
-    function getAncestors(node) {
+    // nodes, highest first, but excluding the root. isBreadCrumb is set to true when 
+    // zooming in and out to force it to always display the root (program) node
+    function getAncestors(node, isBreadCrumb) {
+
+      // Give isBreadCrumb a default value of false
+   	  isBreadCrumb = typeof isBreadCrumb !== 'undefined' ? isBreadCrumb : false;
+
       var path = [];
       var current = node;
       while (current.parent) {
         path.unshift(current);
         current = current.parent;
+      }
+      if(isBreadCrumb)
+      {
+      	path.unshift(current);
       }
       return path;
     }
@@ -283,6 +292,10 @@ function(root, domReady)
           .attr("width", width)
           .attr("height", 50)
           .attr("id", "trail");
+
+      // Initially have root breadcrumb displayed
+      updateBreadcrumbs(getAncestors(oldStructure, true));
+
       }
 
     // Generate a string that describes the points of a breadcrumb polygon.
@@ -317,7 +330,7 @@ function(root, domReady)
 
     // Update the breadcrumb trail to show the current sequence
     function updateBreadcrumbs(nodeArray) {
-      // // Reset widths of the current trail if at root node
+      // Reset widths of the current trail if at root node
       if (bWidths.length >= nodeArray.length)
       {
         // recaluclate new bWidths
@@ -364,9 +377,7 @@ function(root, domReady)
       g.exit().remove();
 
 
-      // Make the breadcrumb trail visible, if it's hidden.
-      d3.select("#trail")
-          .style("visibility", "");
+
 
     }
 

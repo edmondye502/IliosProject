@@ -14,7 +14,7 @@ function(root, domReady)
 
 
     //var color = d3.scale.category10();
-    var color = ["#1f77b4", "#32cd32","#aec7e8", "#9467bd",
+    var color = ["#1f77b4", "#32cd32","#aec7e8", "#FFBF00",
     "#7f7f7f", "#17becf", "#756bb1", "#9e9ac8"];
 
     var vis = d3.select("#chart").append("svg:svg")

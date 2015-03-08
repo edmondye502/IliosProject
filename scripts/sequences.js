@@ -17,11 +17,6 @@ function(programs, programYears, cohorts, courses, competencies, objectives, dom
     var height = 600;
     var radius = Math.min(width, height) / 2;
 
-    // Breadcrumb dimensions: width, height, spacing, width of tip/tail.
-    var b = {
-      w: 75, h: 30, s: 3, t: 10
-    };
-
     // Mapping of step titles to colors.
     // var colors = {
     //   "programs": "#5687d1",
@@ -55,57 +50,9 @@ function(programs, programYears, cohorts, courses, competencies, objectives, dom
     var oldStructure = {}; 	
     	
     	
-    // Use d3.text and d3.csv.parseRows so that we do not need to have a header
-    // row, and can receive the csv as an array of arrays.
-
-
-    //   var json = {
-    //  "title": "Ilios Circumlum Visualizer",
-    //  "children": [
-    // 	{"title":"Medicine",
-    // 	 "children":[
-    // 		{
-    // 		  "title":"Year One",
-    // 		  "children":[
-    // 		  {"title":"Biochemistry"},
-    // 		  {"title":"Clinical Skills 1"},
-    // 		  {"title":"Cell Biology ADV"},
-    // 		  {"title":"Holistic Health"}
-    // 		  ]
-
-    // 		},
-    // 		{
-    // 		  "title":"Year Two",
-    // 		  "children":[
-    // 		  {"title":"Family Medicine"},
-    // 		  {"title":"Cancer Fundamentals"},
-    // 		  {"title":"Emergency Medicine"}
-    // 		  ]
-
-    // 		}]},
-    // 	{"title":"Pharmacy",
-    // 	 "children":[
-    // 		{
-    // 		  "title":"Year Three",
-    // 		  "children":[
-    // 		  {"title":"Public Health"},
-    // 		  {"title":"Electronic Health"}
-    // 		  ]
-
-    // 		},
-    // 		{
-    // 		  "title":"Year Four",
-    // 		  "children":[
-    // 		  {"title":"FamilyMedicine"},
-    // 		  {"title":"Intership"}
-    // 		  ]
-
-    // 		}]}
-    //  ]
-    // }
-      var json = buildRoot(); 
-      console.log(json);
-      createVisualization(json);
+    var json = buildRoot(); 
+    //console.log(json);
+    createVisualization(json);
 
 
     // Main function to draw and set up the visualization, once we have the data.

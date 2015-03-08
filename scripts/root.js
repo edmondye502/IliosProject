@@ -78,6 +78,8 @@ function(programs, programYears, cohorts, courses, competencies, objectives)
     return course_obj_arr;
     }
   
+  
+
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // given cohortid, returns courses
@@ -175,6 +177,7 @@ function(programs, programYears, cohorts, courses, competencies, objectives)
         };
       
     var root = {title: p_titles,  children: cohort_layer};
+    console.log(root);
     return root;
     };
 

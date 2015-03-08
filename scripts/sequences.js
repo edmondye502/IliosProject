@@ -26,7 +26,8 @@ function(root, domReady)
 
     var partition = d3.layout.partition()
         .size([2 * Math.PI, radius * radius])
-        .value(function(d) { return d.size;});
+        .value(function(d) { return d.size;})
+        .sort(compareCourses);
 
     var arc = d3.svg.arc()
         .startAngle(function(d) { return d.x; })
@@ -88,6 +89,16 @@ function(root, domReady)
     	}
      }
      
+         // comparison function 
+    function compareCourses(a,b){
+      if(a.title < b.title){
+        return -1;
+      }  
+      if(a.title > b.title){
+        return 1;
+      }
+      return 0;
+    }
      
     function zoomIn(d)
     {

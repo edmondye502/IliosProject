@@ -14,8 +14,27 @@ function(root, domReady)
 
 
     //var color = d3.scale.category10();
-    var color = ["#1f77b4", "#32cd32","#aec7e8", "#FFBF00",
-    "#7f7f7f", "#17becf", "#756bb1", "#9e9ac8"];
+    // var color = ["#1f77b4", "#32cd32","#aec7e8", "#FFBF00",
+    // "#7f7f7f", "#17becf", "#e7ba52", "#9e9ac8"];
+
+    // var color = ["#218C8D", "#6CCECB","#F9E559", "#EF7126",
+    // "#8EDC9D", "#473E3F"];
+
+    // var color = ["#020731", "#3862C6","#6E7587", "#806641",
+    // "#AE956D"];
+
+    // var color = ["#9DAF72", "#566047","#562F32", "#462D44",
+    // "#859731", "#640E27"];
+
+    // var color = ["#6BCAE2", "#51A5BA","#41924B", "#AFEAAA",
+    // "#87E293", "#FE8402"];
+
+    // var color = ["#F57E20", "#FED833","#CCCC51", "#8FB258",
+    // "#192B33"];
+
+    var color = ["#C22326", "#F37338","#FDB632", "#027878",
+    "#801638"];
+
 
     var vis = d3.select("#chart").append("svg:svg")
         .attr("width", width)
@@ -53,11 +72,15 @@ function(root, domReady)
           .attr("r", radius)
           .style("opacity", 0)
     	  .on("click", clickCenter)
+        .on("mouseover", mouseInCenter)
+
+        
     	  
     	  
       // start with text in middle
       d3.select("#center")
           .text("Ilios Visualizer")
+          
     	  
       var nodes = partition.nodes(json);
 
@@ -163,6 +186,15 @@ function(root, domReady)
     	return true;
     	}
     	return false; 
+    }
+    function mouseInCenter(d) {
+      // Middle text empty
+      d3.select("#center")
+          .text("")
+
+      // All segments visible
+      d3.selectAll("path")
+          .style("opacity", 1);
     }
 
     // Fade all but the current sequence, and show it in the breadcrumb trail.
@@ -285,7 +317,6 @@ function(root, domReady)
 
     // Update the breadcrumb trail to show the current sequence
     function updateBreadcrumbs(nodeArray) {
-
       // // Reset widths of the current trail if at root node
       if (bWidths.length >= nodeArray.length)
       {

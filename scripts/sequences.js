@@ -46,7 +46,7 @@ function(root, domReady)
     // var color = ["#F57E20", "#FED833","#CCCC51", "#8FB258",
     // "#192B33"];
 
-    var color = ["#A1D99B","#74C476","#6BAED6","#D9D9D9","#778899"];
+    var color = ["#A1D99B","#74C476","#ffc885","#6BAED6","#D9D9D9","#CB9E70","#778899"];
 
 
     var vis = d3.select("#chart").append("svg:svg")

@@ -87,8 +87,8 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
     // Main function to draw and set up the visualization, once we have the data.
     function createVisualization(json) {
       // Basic setup of page elements.
-      initializeBreadcrumbTrail();
       oldStructure = json; 
+      initializeBreadcrumbTrail();
 
       // Bounding circle underneath the sunburst, to make it easier to detect
       // when the mouse leaves the parent g.
@@ -128,6 +128,7 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
 
      function click(d){
     	if(arcHasChildren(d)){
+      		updateBreadcrumbs(getAncestors(d, true));
     		zoomIn(d);
     	}
      }

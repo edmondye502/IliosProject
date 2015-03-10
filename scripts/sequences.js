@@ -379,7 +379,11 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
 
     function pickColor(d){
       var title = d.title;
-      return color[title.length % (color.length)];
+      var ascii_value = 0;
+      for (var i = 0; i < title.length; i++) {
+        ascii_value += title[i].charCodeAt(0);
+      };
+      return color[ascii_value % (color.length)];
     };
 
 

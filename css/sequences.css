@@ -13,6 +13,9 @@ body {
   width: 750px;
 }
 
+#menu {
+  height: 25px;
+}
 #sidebar {
   float: right;
   width: 100px;

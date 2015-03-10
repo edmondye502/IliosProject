@@ -273,6 +273,9 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
           .attr("height", 50)
           .attr("id", "trail");
 
+      // reset breadcrumb values
+      bWidths = [];
+
       // Initially have root breadcrumb displayed
       updateBreadcrumbs(getAncestors(oldStructure, true));
 
@@ -356,31 +359,28 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
       // Remove exiting nodes.
       g.exit().remove();
 
-
-
-
     }
 
 
-     function arcTween(a){
-                        var i = d3.interpolate({x: a.x0, dx: a.dx0}, a);
-                        return function(t) {
-                            var b = i(t);
-                            a.x0 = b.x;
-                            a.dx0 = b.dx;
-                            return arc(b);
-                        };
-                    };
+    function arcTween(a){
+      var i = d3.interpolate({x: a.x0, dx: a.dx0}, a);
+      return function(t) {
+        var b = i(t);
+        a.x0 = b.x;
+        a.dx0 = b.dx;
+        return arc(b);
+      };
+    };
             
     function stash(d) {
-                        d.x0 = 0; // d.x;
-                        d.dx0 = 0; //d.dx;
-                    }; 
+      d.x0 = 0; // d.x;
+      d.dx0 = 0; //d.dx;
+    }; 
 
-          function pickColor(d){
-        var title = d.title;
-        return color[title.length % (color.length)];
-      }
+    function pickColor(d){
+      var title = d.title;
+      return color[title.length % (color.length)];
+    };
 
 
     var skinChange = function() {
@@ -399,6 +399,7 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
         var path = vis.data([d]).selectAll("path")
           .style("fill", function(d) { return pickColor(d)}) 
 
+
     }
 
     //add this event listener to the first menu (as a whole):
@@ -406,9 +407,9 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
 
 
     var programChange = function() {
-        var programName = d3.event.target.value;
-        json = tree.buildRoot(programName);
-        oldStructure = json; 
+      var programName = d3.event.target.value;
+      json = tree.buildRoot(programName);
+      oldStructure = json; 
 
 
       var sections = d3.select("#container").selectAll("path")
@@ -427,6 +428,8 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
           .style("opacity", 1)
           .on("mouseover", mouseover)
           .on("click", click);
+
+      initializeBreadcrumbTrail();
     }
 
     //add this event listener to the first menu (as a whole):

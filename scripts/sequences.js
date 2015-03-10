@@ -1,14 +1,16 @@
 require([
 	'root',
-  'initializeSkinDropdown', 'initializeProgramDropdown', 'skins',
+  'initializeSkinDropdown', 'initializeProgramDropdown',
     'domready'
 ], 
 
-function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady) 
+function(root, initializeSkinDropdown, initializeProgramDropdown, domReady) 
 {
   var draw = function()
   {
-    var color = initializeSkinDropdown(); 
+    // initialize skin color
+    var skin_obj = initializeSkinDropdown;
+    var color = skin_obj.defaultSkin(); 
 
     // Dimensions of sunburst.
     var width = 750;
@@ -390,7 +392,7 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
     var skinChange = function() {
         var colorName = d3.event.target.value;
         
-        color = skins[colorName].pallete; 
+        color = skin_obj.getPallete(colorName); 
       
 
         var d; 

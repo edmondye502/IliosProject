@@ -22,9 +22,10 @@ function(skins)
     return arr[0].pallete;
   }
   
+  function getPallete(skin_name){
+    return skins[skin_name].pallete;
+  }
 
-	return function()
-	{
-		return defaultSkin();
-	}
+	return {defaultSkin:defaultSkin,
+          getPallete:getPallete}
 });

@@ -119,11 +119,11 @@ function(programs, programYears, cohorts, courses, competencies, objectives)
 
 
     function allProgramTitles(){
-      var p_titles = [];
+      var p_title = [];
       for(var i in programs){
-        p_titles.push(programs[i].shortTitle);
+        p_title.push(programs[i].shortTitle);
       }
-      return p_titles;
+      return p_title;
     }
 
     function programTitleToAssociatedID(p_title){
@@ -159,10 +159,11 @@ function(programs, programYears, cohorts, courses, competencies, objectives)
 
 
 // 3-layer (single)programs -> cohorts -> programs -> competencies
-    function buildRoot(){
-      var p_titles = allProgramTitles(); 
-      p_titles = p_titles[0]; // Pharm/MD
-        var pid = programTitleToAssociatedID(p_titles);
+    function buildRoot(p_title){
+      // var p_title = allProgramTitles(); 
+      // p_title = p_title[0]; // Pharm/MD
+      // console.log("inside root title",p_title);
+        var pid = programTitleToAssociatedID(p_title);
         var c_ids = programChildren(pid);
         var cohort_layer = [];
         for (var i = 0; i < c_ids.length; i++) {
@@ -171,19 +172,21 @@ function(programs, programYears, cohorts, courses, competencies, objectives)
           var cohort_courses = cohorts[c_ids[i]].courses;
           for (var j = 0; j < competency_ids.length; j++) {
             var course_layer = competencyIDToCourses(competency_ids[j], cohort_courses);
-            competency_layer.push({title: competencies[competency_ids[j]].title,  children: course_layer});
+            if(course_layer.length > 0){
+              competency_layer.push({title: competencies[competency_ids[j]].title,  children: course_layer});
+            }
+            else{
+              competency_layer.push({title: competencies[competency_ids[j]].title,  size:1, children: []})
+            }
           };
           cohort_layer.push({title: cohorts[c_ids[i]].title, children: competency_layer});
         };
       
-    var root = {title: p_titles,  children: cohort_layer};
+    var root = {title: p_title,  children: cohort_layer};
+    console.log("inside root ROOT",root);
     return root;
     };
 
 
-
-	return function()
-	{
-		return buildRoot();
-	}
+    return {buildRoot: buildRoot}
 });

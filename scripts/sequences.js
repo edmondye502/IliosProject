@@ -1,39 +1,19 @@
 require([
 	'root',
+  'initializeSkinDropdown', 'initializeProgramDropdown', 'skins',
     'domready'
 ], 
 
-function(root, domReady) 
+function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady) 
 {
   var draw = function()
   {
+    var color = initializeSkinDropdown(); 
+
     // Dimensions of sunburst.
     var width = 750;
     var height = 600;
     var radius = Math.min(width, height) / 2;
-
-
-    //var color = d3.scale.category10();
-    // var color = ["#1f77b4", "#32cd32","#aec7e8", "#FFBF00",
-    // "#7f7f7f", "#17becf", "#e7ba52", "#9e9ac8"];
-
-    // var color = ["#218C8D", "#6CCECB","#F9E559", "#EF7126",
-    // "#8EDC9D", "#473E3F"];
-
-    // var color = ["#020731", "#3862C6","#6E7587", "#806641",
-    // "#AE956D"];
-
-    // var color = ["#9DAF72", "#566047","#562F32", "#462D44",
-    // "#859731", "#640E27"];
-
-    // var color = ["#6BCAE2", "#51A5BA","#41924B", "#AFEAAA",
-    // "#87E293", "#FE8402"];
-
-    // var color = ["#F57E20", "#FED833","#CCCC51", "#8FB258",
-    // "#192B33"];
-
-    var color = ["#C22326", "#F37338","#FDB632", "#027878",
-    "#801638"];
 
 
     var vis = d3.select("#chart").append("svg:svg")
@@ -55,13 +35,18 @@ function(root, domReady)
         .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
      
     var oldStructure = {}; 	
-    var json = root(); 
+    var tree = root;
+    //console.log("AT TOP TREE", tree);
+    //console.log(tree.add(1,2));
+    var default_program_name = initializeProgramDropdown.defaultProgramName(); 
+    //console.log("defaultname", default_program_name);
+    var json = tree.buildRoot(default_program_name); 
+    //console.log("AT TOP JSON", json);
     createVisualization(json);
 
 
     // Main function to draw and set up the visualization, once we have the data.
     function createVisualization(json) {
-
       // Basic setup of page elements.
       initializeBreadcrumbTrail();
       oldStructure = json; 
@@ -390,6 +375,62 @@ function(root, domReady)
         var title = d.title;
         return color[title.length % (color.length)];
       }
+
+
+    var skinChange = function() {
+        var colorName = d3.event.target.value;
+        
+        color = skins[colorName].pallete; 
+      
+
+        var d; 
+        if(oldStructure){
+          d = oldStructure;
+        }
+        else{
+          d = json; 
+        }
+        var path = vis.data([d]).selectAll("path")
+          .style("fill", function(d) { return pickColor(d)}) 
+
+    }
+
+    //add this event listener to the first menu (as a whole):
+    d3.select("#skin-dropdown").on("change", skinChange);
+
+
+    var programChange = function() {
+        var programName = d3.event.target.value;
+        // console.log("change name: ", programName);
+        // console.log("global tree", tree);
+        // console.log("before", tree.buildRoot(programName));
+        json = tree.buildRoot(programName);
+        oldStructure = json; 
+
+        console.log("global json",json);
+
+              var sections = d3.select("#container").selectAll("path")
+
+      sections.remove();
+
+      var nodes = partition.nodes(json);
+
+      var path = vis.data([json]).selectAll("path")
+            .data(nodes)
+          .enter().append("svg:path")
+          .attr("display", function(d) { return d.depth ? null : "none"; })
+          .attr("d", arc)
+          .attr("fill-rule", "evenodd")
+          .style("fill", function(d) { return pickColor(d)})
+          .style("opacity", 1)
+          .on("mouseover", mouseover)
+          .on("click", click);
+
+      console.log(nodes);
+    }
+
+    //add this event listener to the first menu (as a whole):
+    d3.select("#program-dropdown").on("change", programChange);
 
   };
 

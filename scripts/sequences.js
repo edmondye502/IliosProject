@@ -16,6 +16,45 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
     var radius = Math.min(width, height) / 2;
 
 
+<<<<<<< HEAD
+=======
+    // Breadcrumb default dimensions: width, height, spacing, width of tip/tail, 
+        //multiplier to increase width of breadcrumb based on length of d.title (m >= 7)
+    var b = {
+      w: 75, h: 30, s: 5, t: 10, m: 8
+    };
+
+    // Holds the width of all the nodes in the current path
+    var bWidths = [];
+
+    // Minimum width of a breadcrumb is defined by b.w; 
+      //addWidth will increase the length of a breadcrumb width based on d.title
+    var addWidth = 0;
+
+
+    //var color = d3.scale.category10();
+    // var color = ["#1f77b4", "#32cd32","#aec7e8", "#FFBF00",
+    // "#7f7f7f", "#17becf", "#e7ba52", "#9e9ac8"];
+
+    // var color = ["#218C8D", "#6CCECB","#F9E559", "#EF7126",
+    // "#8EDC9D", "#473E3F"];
+
+    // var color = ["#020731", "#3862C6","#6E7587", "#806641",
+    // "#AE956D"];
+
+    // var color = ["#9DAF72", "#566047","#562F32", "#462D44",
+    // "#859731", "#640E27"];
+
+    // var color = ["#6BCAE2", "#51A5BA","#41924B", "#AFEAAA",
+    // "#87E293", "#FE8402"];
+
+    // var color = ["#F57E20", "#FED833","#CCCC51", "#8FB258",
+    // "#192B33"];
+
+    var color = ["#A1D99B","#74C476","#BFA2B1","#6BAED6","#D9D9D9","#E0A366","#778899"];
+
+
+>>>>>>> origin/full-sequence-
     var vis = d3.select("#chart").append("svg:svg")
         .attr("width", width)
         .attr("height", height)
@@ -85,6 +124,8 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
       d3.select("#container").on("mouseleave", mouseleave) ;
      };
 
+
+
      function click(d){
     	if(arcHasChildren(d)){
     		zoomIn(d);
@@ -93,7 +134,8 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
      
      function clickCenter(){
     	if(oldStructure){
-    	zoomOut()
+    		updateBreadcrumbs(getAncestors(oldStructure, true));
+    		zoomOut()
     	}
      }
      
@@ -139,7 +181,6 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
       // sections represents all 16 sections, 
 
       var sections = d3.select("#container").selectAll("path")
-
       sections.remove();
       
       var d = oldStructure; // ONLY DIFFERENCE
@@ -182,7 +223,6 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
           .style("opacity", 1);
     }
 
-    // Fade all but the current sequence, and show it in the breadcrumb trail.
     function mouseover(d) {
       // change text in middle circle to reflect title of node
       d3.select("#center")
@@ -192,7 +232,6 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
           .style("visibility", "");
 
       var sequenceArray = getAncestors(d);
-      updateBreadcrumbs(sequenceArray);
 
       // Fade all the segments.
       d3.selectAll("path")
@@ -209,9 +248,6 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
     // Restore everything to full opacity when moving off the visualization.
     function mouseleave(d) {
 
-      // Hide the breadcrumb trail
-      d3.select("#trail")
-          .style("visibility", "hidden");
 
       // Deactivate all segments during transition.
       d3.selectAll("path").on("mouseover", null);
@@ -237,27 +273,24 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
     }
 
 
-    // Breadcrumb default dimensions: width, height, spacing, width of tip/tail, 
-        //multiplier to increase width of breadcrumb based on length of d.title (m >= 7)
-    var b = {
-      w: 75, h: 30, s: 5, t: 10, m: 8
-    };
-
-    // Holds the width of all the nodes in the current path
-    var bWidths = [];
-
-    // Minimum width of a breadcrumb is defined by b.w; 
-      //addWidth will increase the length of a breadcrumb width based on d.title
-    var addWidth = 0;
 
     // Given a node in a partition layout, return an array of all of its ancestor
-    // nodes, highest first, but excluding the root.
-    function getAncestors(node) {
+    // nodes, highest first, but excluding the root. isBreadCrumb is set to true when 
+    // zooming in and out to force it to always display the root (program) node
+    function getAncestors(node, isBreadCrumb) {
+
+      // Give isBreadCrumb a default value of false
+   	  isBreadCrumb = typeof isBreadCrumb !== 'undefined' ? isBreadCrumb : false;
+
       var path = [];
       var current = node;
       while (current.parent) {
         path.unshift(current);
         current = current.parent;
+      }
+      if(isBreadCrumb)
+      {
+      	path.unshift(current);
       }
       return path;
     }
@@ -268,6 +301,10 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
           .attr("width", width)
           .attr("height", 50)
           .attr("id", "trail");
+
+      // Initially have root breadcrumb displayed
+      updateBreadcrumbs(getAncestors(oldStructure, true));
+
       }
 
     // Generate a string that describes the points of a breadcrumb polygon.
@@ -302,7 +339,7 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
 
     // Update the breadcrumb trail to show the current sequence
     function updateBreadcrumbs(nodeArray) {
-      // // Reset widths of the current trail if at root node
+      // Reset widths of the current trail if at root node
       if (bWidths.length >= nodeArray.length)
       {
         // recaluclate new bWidths
@@ -349,9 +386,7 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
       g.exit().remove();
 
 
-      // Make the breadcrumb trail visible, if it's hidden.
-      d3.select("#trail")
-          .style("visibility", "");
+
 
     }
 

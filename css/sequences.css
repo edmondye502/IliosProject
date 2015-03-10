@@ -15,6 +15,7 @@ body {
 
 #menu {
   height: 25px;
+  padding-bottom: 5px;
 }
 #sidebar {
   float: right;

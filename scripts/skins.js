@@ -1,6 +1,6 @@
 define({
   
-  'sunburst': { 
+  'basic': { 
     'name': 'basic',
     'pallete': ["#A1D99B","#74C476","#BFA2B1","#6BAED6","#D9D9D9","#E0A366","#778899"]} ,
 

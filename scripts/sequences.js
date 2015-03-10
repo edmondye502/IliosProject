@@ -16,8 +16,6 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
     var radius = Math.min(width, height) / 2;
 
 
-<<<<<<< HEAD
-=======
     // Breadcrumb default dimensions: width, height, spacing, width of tip/tail, 
         //multiplier to increase width of breadcrumb based on length of d.title (m >= 7)
     var b = {
@@ -31,30 +29,6 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
       //addWidth will increase the length of a breadcrumb width based on d.title
     var addWidth = 0;
 
-
-    //var color = d3.scale.category10();
-    // var color = ["#1f77b4", "#32cd32","#aec7e8", "#FFBF00",
-    // "#7f7f7f", "#17becf", "#e7ba52", "#9e9ac8"];
-
-    // var color = ["#218C8D", "#6CCECB","#F9E559", "#EF7126",
-    // "#8EDC9D", "#473E3F"];
-
-    // var color = ["#020731", "#3862C6","#6E7587", "#806641",
-    // "#AE956D"];
-
-    // var color = ["#9DAF72", "#566047","#562F32", "#462D44",
-    // "#859731", "#640E27"];
-
-    // var color = ["#6BCAE2", "#51A5BA","#41924B", "#AFEAAA",
-    // "#87E293", "#FE8402"];
-
-    // var color = ["#F57E20", "#FED833","#CCCC51", "#8FB258",
-    // "#192B33"];
-
-    var color = ["#A1D99B","#74C476","#BFA2B1","#6BAED6","#D9D9D9","#E0A366","#778899"];
-
-
->>>>>>> origin/full-sequence-
     var vis = d3.select("#chart").append("svg:svg")
         .attr("width", width)
         .attr("height", height)
@@ -75,12 +49,8 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
      
     var oldStructure = {}; 	
     var tree = root;
-    //console.log("AT TOP TREE", tree);
-    //console.log(tree.add(1,2));
     var default_program_name = initializeProgramDropdown.defaultProgramName(); 
-    //console.log("defaultname", default_program_name);
     var json = tree.buildRoot(default_program_name); 
-    //console.log("AT TOP JSON", json);
     createVisualization(json);
 
 
@@ -437,15 +407,11 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
 
     var programChange = function() {
         var programName = d3.event.target.value;
-        // console.log("change name: ", programName);
-        // console.log("global tree", tree);
-        // console.log("before", tree.buildRoot(programName));
         json = tree.buildRoot(programName);
         oldStructure = json; 
 
-        console.log("global json",json);
 
-              var sections = d3.select("#container").selectAll("path")
+      var sections = d3.select("#container").selectAll("path")
 
       sections.remove();
 
@@ -461,8 +427,6 @@ function(root, initializeSkinDropdown, initializeProgramDropdown,skins, domReady
           .style("opacity", 1)
           .on("mouseover", mouseover)
           .on("click", click);
-
-      console.log(nodes);
     }
 
     //add this event listener to the first menu (as a whole):

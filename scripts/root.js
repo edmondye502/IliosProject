@@ -183,7 +183,6 @@ function(programs, programYears, cohorts, courses, competencies, objectives)
         };
       
     var root = {title: p_title,  children: cohort_layer};
-    console.log("inside root ROOT",root);
     return root;
     };
 

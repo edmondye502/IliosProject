@@ -1,7 +1,11 @@
 define({
   
   'sunburst': { 
-    'name': 'sunburst',
+    'name': 'basic',
+    'pallete': ["#A1D99B","#74C476","#BFA2B1","#6BAED6","#D9D9D9","#E0A366","#778899"]} ,
+
+  'sunset' : {
+    'name' : 'sunset',
     'pallete': ["#C22326", "#F37338","#FDB632", "#027878","#801638"]} ,
 
   'snakeskin': {
@@ -30,3 +34,4 @@ define({
     'pallete': ["#9DAF72", "#566047","#562F32", "#462D44","#859731", "#640E27"]}
 
 });
+

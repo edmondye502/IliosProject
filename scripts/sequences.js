@@ -1,3 +1,8 @@
+// sequences.js contains the main visualization function draw(),
+// used to create the model, as well as functions that allow 
+// user interaction
+
+
 require([
 	'root',
   'initializeSkinDropdown', 'initializeProgramDropdown',
@@ -31,6 +36,7 @@ function(root, initializeSkinDropdown, initializeProgramDropdown, domReady)
       //addWidth will increase the length of a breadcrumb width based on d.title
     var addWidth = 0;
 
+    // create svg to display sunburst on
     var vis = d3.select("#chart").append("svg:svg")
         .attr("width", width)
         .attr("height", height)
@@ -38,21 +44,32 @@ function(root, initializeSkinDropdown, initializeProgramDropdown, domReady)
         .attr("id", "container")
         .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
+    // Description of the partition of data
+    // The leaf node has a "size" attribute, which its parents size
+    // is the sum of its children. The nodes are sorted alphabetically. 
     var partition = d3.layout.partition()
         .size([2 * Math.PI, radius * radius])
         .value(function(d) { return d.size;})
         .sort(compareCourses);
 
+    // Create arcs with these properties
     var arc = d3.svg.arc()
         .startAngle(function(d) { return d.x; })
         .endAngle(function(d) { return d.x + d.dx; })
         .innerRadius(function(d) { return Math.sqrt(d.y); })
         .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
      
+    // Holds the previous model, used to zoom in and out
     var oldStructure = {}; 	
+
+    // Initalize the root with default program name
     var tree = root;
     var default_program_name = initializeProgramDropdown.defaultProgramName(); 
+
+    // Copy of original built root, if needed to refer back to 
     var json = tree.buildRoot(default_program_name); 
+
+    // Start visualization
     createVisualization(json);
 
 
@@ -70,18 +87,23 @@ function(root, initializeSkinDropdown, initializeProgramDropdown, domReady)
     	  .on("click", clickCenter)
         .on("mouseover", mouseInCenter)
 
-        
-    	  
-    	  
-      // start with text in middle
+    	// start with text in middle
       d3.select("#center")
           .text("Ilios Visualizer")
           
-    	  
-      var nodes = partition.nodes(json);
+      // create the nodes given partition description above,
+      // and create arcs inside of "paths"  
+      initializePaths();
+	
+      // Add the mouseleave handler to the bounding circle.
+      d3.select("#container").on("mouseleave", mouseleave) ;
+     };
 
+
+    function initializePaths(){
+      var nodes = partition.nodes(json);
       var path = vis.data([json]).selectAll("path")
-          .data(nodes)
+            .data(nodes)
           .enter().append("svg:path")
           .attr("display", function(d) { return d.depth ? null : "none"; })
           .attr("d", arc)
@@ -90,14 +112,9 @@ function(root, initializeSkinDropdown, initializeProgramDropdown, domReady)
           .style("opacity", 1)
           .on("mouseover", mouseover)
           .on("click", click);
-	
+    }
 
-      // Add the mouseleave handler to the bounding circle.
-      d3.select("#container").on("mouseleave", mouseleave) ;
-     };
-
-
-
+     // If click on arc
      function click(d){
     	if(arcHasChildren(d)){
       		updateBreadcrumbs(getAncestors(d, true));
@@ -105,6 +122,7 @@ function(root, initializeSkinDropdown, initializeProgramDropdown, domReady)
     	}
      }
      
+     // If click on Circle (Center)
      function clickCenter(){
     	if(oldStructure){
     		updateBreadcrumbs(getAncestors(oldStructure, true));
@@ -112,7 +130,61 @@ function(root, initializeSkinDropdown, initializeProgramDropdown, domReady)
     	}
      }
      
-         // comparison function 
+
+    function mouseInCenter(d) {
+      // Middle text empty
+      d3.select("#center")
+          .text("")
+
+      // All segments visible
+      d3.selectAll("path")
+          .style("opacity", 1);
+    }
+
+    function mouseover(d) {
+      // change text in middle circle to reflect title of node
+      d3.select("#center")
+          .text(d.title);
+
+      d3.select("#explanation")
+          .style("visibility", "");
+
+      var sequenceArray = getAncestors(d);
+
+      // Fade all the segments.
+      d3.selectAll("path")
+          .style("opacity", 0.3);
+
+      // Then highlight only those that are an ancestor of the current segment.
+      vis.selectAll("path")
+          .filter(function(node) {
+                    return (sequenceArray.indexOf(node) >= 0);
+                  })
+          .style("opacity", 1);
+    }
+
+    // Restore everything to full opacity when moving off the visualization.
+    function mouseleave(d) {
+      // Deactivate all segments during transition.
+      d3.selectAll("path").on("mouseover", null);
+
+      // Transition each segment to full opacity and then reactivate it.
+      d3.selectAll("path")
+          .transition()
+          .duration(300)
+          .style("opacity", 1)
+          .each("end", function() {
+                  d3.select(this).on("mouseover", mouseover);
+                });
+
+      d3.select("#explanation")
+          .transition()
+          .duration(1000)
+          .style("visibility", "hidden");   
+    }
+
+
+    // Comparison function used to sort nodes alphabetically 
     function compareCourses(a,b){
       if(a.title < b.title){
         return -1;
@@ -185,64 +257,6 @@ function(root, initializeSkinDropdown, initializeProgramDropdown, domReady)
     	return true;
     	}
     	return false; 
-    }
-    function mouseInCenter(d) {
-      // Middle text empty
-      d3.select("#center")
-          .text("")
-
-      // All segments visible
-      d3.selectAll("path")
-          .style("opacity", 1);
-    }
-
-    function mouseover(d) {
-      // change text in middle circle to reflect title of node
-      d3.select("#center")
-          .text(d.title);
-
-      d3.select("#explanation")
-          .style("visibility", "");
-
-      var sequenceArray = getAncestors(d);
-
-      // Fade all the segments.
-      d3.selectAll("path")
-          .style("opacity", 0.3);
-
-      // Then highlight only those that are an ancestor of the current segment.
-      vis.selectAll("path")
-          .filter(function(node) {
-                    return (sequenceArray.indexOf(node) >= 0);
-                  })
-          .style("opacity", 1);
-    }
-
-    // Restore everything to full opacity when moving off the visualization.
-    function mouseleave(d) {
-
-
-      // Deactivate all segments during transition.
-      d3.selectAll("path").on("mouseover", null);
-
-      // Transition each segment to full opacity and then reactivate it.
-      d3.selectAll("path")
-          .transition()
-          .duration(300)
-          .style("opacity", 1)
-          .each("end", function() {
-                  d3.select(this).on("mouseover", mouseover);
-                });
-
-      d3.select("#explanation")
-          .transition()
-          .duration(1000)
-          .style("visibility", "hidden");
-    	  
-      // return to basic text in middle when mouse leaves
-      // d3.select("#center")
-      //     .text("Ilios Visualizer")
-    	 //  .style("visibility","visible");
     }
 
 
@@ -379,6 +393,7 @@ function(root, initializeSkinDropdown, initializeProgramDropdown, domReady)
       d.dx0 = 0; //d.dx;
     }; 
 
+    // Choose color based on ascii value of title
     function pickColor(d){
       var title = d.title;
       var ascii_value = 0;
@@ -388,7 +403,7 @@ function(root, initializeSkinDropdown, initializeProgramDropdown, domReady)
       return color[ascii_value % (color.length)];
     };
 
-
+    // Change skin based on selection
     var skinChange = function() {
         var colorName = d3.event.target.value;
         
@@ -411,36 +426,22 @@ function(root, initializeSkinDropdown, initializeProgramDropdown, domReady)
     //add this event listener to the first menu (as a whole):
     d3.select("#skin-dropdown").on("change", skinChange);
 
-
+    // Change program and model as reflection of selection
     var programChange = function() {
       var programName = d3.event.target.value;
       json = tree.buildRoot(programName);
       oldStructure = json; 
 
-
       var sections = d3.select("#container").selectAll("path")
-
       sections.remove();
 
-      var nodes = partition.nodes(json);
 
-      var path = vis.data([json]).selectAll("path")
-            .data(nodes)
-          .enter().append("svg:path")
-          .attr("display", function(d) { return d.depth ? null : "none"; })
-          .attr("d", arc)
-          .attr("fill-rule", "evenodd")
-          .style("fill", function(d) { return pickColor(d)})
-          .style("opacity", 1)
-          .on("mouseover", mouseover)
-          .on("click", click);
-
+      initializePaths();
       initializeBreadcrumbTrail();
     }
 
     //add this event listener to the first menu (as a whole):
     d3.select("#program-dropdown").on("change", programChange);
-
   };
 
 

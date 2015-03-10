@@ -1,4 +1,6 @@
-// root.js
+// root.js contains utility functions that pulls data. 
+// buildRoot() is the main function that executes the 
+// utility functions to create a root for the visualization.
 
 define([
     'data/programs',
@@ -11,7 +13,8 @@ define([
 
 function(programs, programYears, cohorts, courses, competencies, objectives) 
 {
-      function inside(x, arr){
+    //check if a particular value exists inside an array
+    function inside(x, arr){
       if(arr){
       for (var i = 0; i < arr.length; i++) {
         if(x == arr[i]){
@@ -21,36 +24,33 @@ function(programs, programYears, cohorts, courses, competencies, objectives)
     }
       return false; 
     }
-    
+
+    // Given cohort id, return program title    
     function cohortToProgramTitle(cid){
       var py = programYears[cid.programYear];
       return programs[py.program].title;
     }
 
+    // Given cohort id, return program id    
     function cohortToProgramId(cid){
-      //cohorts[c].programYear;
       var py = programYears[cohorts[cid].programYear];
       return py.program;
     }
 
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // given cohort_id, returns competency ids
-    //cohort -> programYear -> competencies
+    // Given cohort id, returns competency ids
     function cohortToCompetencyIDs(cid){
     var coh = cohorts[cid];
     var py = programYears[coh.programYear];
     return py.competencies;
     }
 
-    // given a competency_id, return an array of courses associated
+    // Given a competency_id, return an array of courses associated
     function competencyIDToCourses(competency_id, cohort_courses){
     var all_associated_courses = [];
 
     var competency_objLVL_ids = competencies[competency_id].objectives;
-          //console.log("competency_ids", competency_objLVL_ids);
     for(var i = 0; i < competency_objLVL_ids.length; i++){
       var course_level_ids = competencyLevel_ObjectiveID_To_CourseLevelIDs(competency_objLVL_ids[i]);
-      //console.log("course_level_ids", course_level_ids);
       for(var j = 0; j < course_level_ids.length; j++){
         var courses_per_obj = CourseLevelObjectiveIDs_To_Courses(course_level_ids[j], cohort_courses);
         all_associated_courses = all_associated_courses.concat(courses_per_obj);
@@ -60,34 +60,33 @@ function(programs, programYears, cohorts, courses, competencies, objectives)
     return all_associated_courses;
     }
 
-    //given a competency level objective id, get children id's
+    // Given a competency level objective id, get children id's
     function competencyLevel_ObjectiveID_To_CourseLevelIDs(objective_id){
     return objectives[objective_id].children;
     }
 
-    //given course level objective id get arr courses (objects)
+    // Given course level objective id get arr courses (objects)
+    // Push size : 1 -> Layers above use this value(sum of children size) to 
+    // relate its size/display. 
     function CourseLevelObjectiveIDs_To_Courses(objective_id, cohort_courses){
-    var course_obj_arr = []
-    var course_ids = objectives[objective_id].courses; 
-    for (var i = 0; i < course_ids.length; i++) {
-      if(inside(course_ids[i], cohort_courses)){
-        var c = courses[course_ids[i]];
-        course_obj_arr.push({title: c.title, size: 1});
-      }
-    }
+      var course_obj_arr = []
+      var course_ids = objectives[objective_id].courses; 
+      for (var i = 0; i < course_ids.length; i++) {
+        if(inside(course_ids[i], cohort_courses)){
+          var c = courses[course_ids[i]];
+          course_obj_arr.push({title: c.title, size: 1});
+        }
+     }
     return course_obj_arr;
     }
   
   
-
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // given cohortid, returns courses
+    // Given cohortid, returns courses
     function cohortToCourses(cid){
       return cohorts[cid].courses; 
     }
 
-    // course -> [competency_obj]
+    // Given course id, return competency ids associated
     function courseToCompetencies(cid){
       var competency_arr = [];
       var oids = courses[cid].objectives;
@@ -100,7 +99,8 @@ function(programs, programYears, cohorts, courses, competencies, objectives)
       return competency_arr;
     } 
 
-      function courseToObjectives(cid){
+    // Given course id, return all objectives for the course
+    function courseToObjectives(cid){
           var objectives_arr = [];
           var oids = courses[cid].objectives;
           for (var i = 0; i < oids.length; i++){
@@ -110,22 +110,13 @@ function(programs, programYears, cohorts, courses, competencies, objectives)
 
       }
 
-
+    // Given objective id, return competencies
     function objectivesToCompetency(oid){
       var competency_id = objectives[oid].competency;
       return competencies[competency_id];
     }
 
-
-
-    function allProgramTitles(){
-      var p_title = [];
-      for(var i in programs){
-        p_title.push(programs[i].shortTitle);
-      }
-      return p_title;
-    }
-
+    // Given a program title, return the program's id
     function programTitleToAssociatedID(p_title){
       for(var i in programs){
         if(programs[i].shortTitle == p_title){
@@ -134,6 +125,7 @@ function(programs, programYears, cohorts, courses, competencies, objectives)
       }
     }
 
+    // Returns all cohort ids
     function allCohortsIDs(){
       var c_ids = [];
       for(var i in cohorts){
@@ -144,7 +136,7 @@ function(programs, programYears, cohorts, courses, competencies, objectives)
     }
 
     
-      // returns cohort_ids
+  // Given program id, returns matching cohort ids
   function programChildren(pid){
       var c_ids = allCohortsIDs();
       var matching_cohorts = [];
@@ -158,16 +150,13 @@ function(programs, programYears, cohorts, courses, competencies, objectives)
   }
 
 
-// 3-layer (single)programs -> cohorts -> programs -> competencies
+// 3-layer given a single program name, cohorts -> programs -> competencies -> courses
     function buildRoot(p_title){
-      // var p_title = allProgramTitles(); 
-      // p_title = p_title[0]; // Pharm/MD
-      // console.log("inside root title",p_title);
         var pid = programTitleToAssociatedID(p_title);
         var c_ids = programChildren(pid);
         var cohort_layer = [];
         for (var i = 0; i < c_ids.length; i++) {
-          var competency_ids = cohortToCompetencyIDs(c_ids[i]); // needs to give back course ids?
+          var competency_ids = cohortToCompetencyIDs(c_ids[i]); 
           var competency_layer = [];
           var cohort_courses = cohorts[c_ids[i]].courses;
           for (var j = 0; j < competency_ids.length; j++) {

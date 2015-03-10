@@ -1,3 +1,8 @@
+// initializeProgramDropdown.js initializes program dropdown on load
+// and returns an object with methods that give a default program name,
+// which is useful for initializing the root, and also all program titles--
+// useful for switching to other roots.
+
 define([
     'data/programs'
 ],

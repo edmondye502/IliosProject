@@ -1,3 +1,6 @@
+// skins.js contains pair objects that have a name
+// as well as a pallete(set of colors)
+
 define({
   
   'basic': { 

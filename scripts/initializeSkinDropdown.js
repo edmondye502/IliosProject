@@ -1,3 +1,7 @@
+// initializeSkinDropdown.js initalializes the skin dropdown 
+// and returns a skin object with functions to retrieve a default
+// skin pallete as well as a particular skin pallete. 
+
 define([
     'skins'
 ],

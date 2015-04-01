@@ -18,8 +18,8 @@ function(root, initializeSkinDropdown, initializeProgramDropdown, domReady)
     var color = skin_obj.defaultSkin(); 
 
     // Dimensions of sunburst.
-    var width = 750;
-    var height = 600;
+    var width = parseInt(d3.select("#chart").style('width'));
+    var height = parseInt(d3.select("#chart").style('height'));
     var radius = Math.min(width, height) / 2;
 
 

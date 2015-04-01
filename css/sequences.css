@@ -3,41 +3,34 @@ body {
   font-size: 12px;
   font-weight: 400;
   background-color: #fff;
-  width: 960px;
-  height: 700px;
   margin-top: 10px;
+  overflow: hidden; 
 }
 
 #main {
   float: left;
-  width: 750px;
+  width: 98vw;
+  height: 95vh; 
 }
 
 #menu {
-  height: 25px;
-  padding-bottom: 5px;
-}
-#sidebar {
-  float: right;
-  width: 100px;
+  height: 5vh;
 }
 
 #sequence {
-  width: 600px;
-  height: 70px;
+  width: 100vw;
+  height: 5vh;
 }
 
-#legend {
-  padding: 10px 0 0 3px;
-}
 
-#sequence text, #legend text {
+#sequence text{
   font-weight: 600;
   fill: #fff;
 }
 
 #chart {
   position: relative;
+  height: 83vh; 
 }
 
 #chart path {
@@ -46,9 +39,9 @@ body {
 
 #explanation {
   position: absolute;
-  top: 260px;
-  left: 305px;
-  width: 140px;
+  top: 40%;
+  left: 43%;
+  width: 15%;
   text-align: center;
   color: #666;
   z-index: -1;
